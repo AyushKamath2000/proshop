@@ -1,13 +1,17 @@
 import React from 'react'
 import { Link, useParams } from "react-router-dom";
-import products from "../products";
 import {Card, Col, ListGroup, ListGroupItem, Row} from "react-bootstrap";
 import Ratings from "../Components/Ratings";
+import {useGetProductDescriptionQuery} from "../slices/productsApiSlice";
+import Loader from "../Components/Loader";
+import Message from "../Components/Message";
 
 const ProductScreen = () => {
     const { id: productID } = useParams();
-    const product = products.find((p) => p._id === productID);
-    console.log(product);
+    const { data: product, isLoading, error } = useGetProductDescriptionQuery(productID);
+
+    if (isLoading) return <Loader/>;
+    if (error) return <Message varient="danger">`Error Loading Data{error.error|| error?.data?.message}`</Message>;
 
     return (
         <>

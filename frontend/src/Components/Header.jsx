@@ -6,7 +6,7 @@ import  img  from '../Assets/img.png'
 const Header = () => {
     return (
         <header>
-                <Navbar bg="dark" variant="dark" expand="md" collapseOnSelec>
+                <Navbar bg="dark" variant="dark" expand="md" collapseOnSelect>
                     <Container>
                         <LinkContainer to = "/">
                             <Navbar.Brand href="/">
