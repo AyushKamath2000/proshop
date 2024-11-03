@@ -1,17 +1,29 @@
 import React from 'react'
-import { Link, useParams } from "react-router-dom";
-import {Card, Col, ListGroup, ListGroupItem, Row} from "react-bootstrap";
+import {Link, useNavigate, useParams} from "react-router-dom";
+import {Card, Col, Form, ListGroup, ListGroupItem, Row} from "react-bootstrap";
 import Ratings from "../Components/Ratings";
 import {useGetProductDescriptionQuery} from "../slices/productsApiSlice";
+import {useState} from "react";
 import Loader from "../Components/Loader";
 import Message from "../Components/Message";
+import {useDispatch} from "react-redux";
+import {addToCart} from "../slices/cartSlice";
 
 const ProductScreen = () => {
     const { id: productID } = useParams();
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    
+    const [qty, setQty] = useState(1);
     const { data: product, isLoading, error } = useGetProductDescriptionQuery(productID);
 
     if (isLoading) return <Loader/>;
     if (error) return <Message varient="danger">`Error Loading Data{error.error|| error?.data?.message}`</Message>;
+
+    const addToCartHandler = (product,qty) => {
+        dispatch(addToCart({ ...product, qty }));
+        navigate("/cart");
+    };
 
     return (
         <>
@@ -45,14 +57,40 @@ const ProductScreen = () => {
                                 </Row>
                             </ListGroupItem>
                             <ListGroupItem>
-                                <div className="row">
+                                <Row>
                                     <Col>Status:</Col>
                                     <Col><strong>{product.countInStock > 0 ? "In Stock" : "Out of Stock"}</strong></Col>
-                                </div>
+                                </Row>
                             </ListGroupItem>
-                            <ListGroupItem>
-                                <button className="btn btn-dark" disabled={product.countInStock === 0}>Add to Cart</button>
-                            </ListGroupItem>
+                            {product.countInStock > 0 && (
+                                <ListGroupItem>
+                                    <Row>
+                                        <Col>Qty</Col>
+                                            <Col>
+                                               <Form.Control
+                                                      as="select"
+                                                      value={qty}
+                                                      onChange={(e) => setQty(Number(e.target.value))}
+                                               >
+                                                   {[...Array(product.countInStock).keys()].map( (i)=>
+                                                       <option key={i + 1} value={i + 1}>
+                                                           {i + 1}
+                                                       </option>
+                                                   )}
+                                               </Form.Control>
+                                            </Col>
+                                    </Row>
+                                </ListGroupItem>)}   
+                                <ListGroupItem>
+                                    <button
+                                        style={{ width: '100%' }}
+                                        className="btn btn-dark" 
+                                        disabled={product.countInStock === 0}
+                                        onClick={() => addToCartHandler(product, qty)}
+                                    >
+                                        Add to Cart
+                                    </button>
+                                </ListGroupItem>
                         </ListGroup>
                     </Card>
                 </div>
