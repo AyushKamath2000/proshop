@@ -1,9 +1,11 @@
 import React from 'react'
-import{ Navbar, Nav, Container } from 'react-bootstrap'
+import {Navbar, Nav, Container, Badge} from 'react-bootstrap'
 import{ FaShoppingCart, FaUser } from 'react-icons/fa'
 import{ LinkContainer } from 'react-router-bootstrap'
+import {useSelector} from "react-redux";
 import  img  from '../Assets/img.png'
 const Header = () => {
+    const {cartItems} = useSelector(state => state.cart);
     return (
         <header>
                 <Navbar bg="dark" variant="dark" expand="md" collapseOnSelect>
@@ -17,8 +19,17 @@ const Header = () => {
                         <Navbar.Toggle aria-controls="basic-navbar-nav" />
                         <Navbar.Collapse id="basic-navbar-nav">
                             <Nav className="ms-auto">
-                            <LinkContainer to = "/">
-                                <Nav.Link href="/cart"><FaShoppingCart /> Cart</Nav.Link>
+                            <LinkContainer to = "/cart">
+                                <Nav.Link href="/cart">
+                                    <FaShoppingCart /> 
+                                    Cart{cartItems.length>0 && 
+                                    (<Badge 
+                                        pill
+                                        bg = 'success' 
+                                        style ={{ marginLeft: 5}} 
+                                    >{cartItems.reduce((acc,item)=>acc+item.qty,0)}
+                                    </Badge>)}
+                                </Nav.Link>
                             </LinkContainer>
                             <LinkContainer to = "/">
                                 <Nav.Link href="/login"><FaUser /> Sign In</Nav.Link>
