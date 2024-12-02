@@ -9,6 +9,15 @@ import ProductScreen from './Screens/ProductScreen';
 import {Provider} from "react-redux";
 import store from "./store";
 import CartScreen from "./Screens/CartScreen";
+import {LoginScreen} from "./Screens/LoginScreen";
+import RegisterScreen from "./Screens/RegisterScreen";
+import ShippingScreen from "./Screens/ShippingScreen";
+import PrivateRoute from "./Components/PrivateRoute";
+import PaymentScreen from "./Screens/PaymentScreen";
+import PlaceOrderScreen from "./Screens/PlaceOrderScreen";
+import OrderScreen from "./Screens/OrderScreen";
+import{ PayPalScriptProvider} from "@paypal/react-paypal-js";
+import ProfileScreen from "./Screens/ProfileScreen";
 
 const router = createBrowserRouter (
   createRoutesFromElements(
@@ -16,6 +25,16 @@ const router = createBrowserRouter (
       <Route index= {true} path='/' element={ <HomeScreen/> }/>
       <Route path='/products/:id' element={ <ProductScreen/> }/>
       <Route path='/cart' element={ <CartScreen/> }/>
+      <Route path = '/login' element={<LoginScreen/>}/>
+      <Route path = '/register' element={<RegisterScreen/>}/>
+      <Route  path = '' element={<PrivateRoute/>}>
+          <Route path = '/shipping' element={<ShippingScreen/>}/>
+          <Route path = '/payment' element={<PaymentScreen/>}/>
+          <Route path = '/placeorder' element={<PlaceOrderScreen/>}/>
+          <Route path = '/order/:id' element={<OrderScreen/>}/>
+          <Route path = '/order/:id' element={<OrderScreen/>}/>
+          <Route path = '/profile' element={<ProfileScreen/>}/>
+      </Route>
     </Route>
   )
 )
@@ -23,8 +42,10 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
       <Provider store={store} >
+        <PayPalScriptProvider deferLoading={true}>
             <RouterProvider router={router}/>
-        </Provider>
+        </PayPalScriptProvider>
+      </Provider>
   </React.StrictMode>
 );
 reportWebVitals();

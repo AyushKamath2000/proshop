@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import {Link, useNavigate, useParams} from "react-router-dom";
 import {Card, Col, Form, ListGroup, ListGroupItem, Row} from "react-bootstrap";
 import Ratings from "../Components/Ratings";
@@ -6,15 +6,23 @@ import {useGetProductDescriptionQuery} from "../slices/productsApiSlice";
 import {useState} from "react";
 import Loader from "../Components/Loader";
 import Message from "../Components/Message";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {addToCart} from "../slices/cartSlice";
 
 const ProductScreen = () => {
     const { id: productID } = useParams();
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    
     const [qty, setQty] = useState(1);
+    const cart = useSelector(state => state.cart);
+    const { cartItems } = cart;
+    const cartItem = cartItems.find(cartItem => cartItem._id === productID);
+
+    useEffect(() => {
+        if (cartItem) {
+            setQty(cartItem.qty);
+        }
+    }, [cartItem, setQty]);
     const { data: product, isLoading, error } = useGetProductDescriptionQuery(productID);
 
     if (isLoading) return <Loader/>;
@@ -40,7 +48,7 @@ const ProductScreen = () => {
                         <ListGroupItem>
                             <Ratings value={product.rating} text={`${product.numReviews} reviews`} />
                         </ListGroupItem>
-                        <ListGroupItem style={{ textAlign: 'start' }} >
+                        <ListGroupItem>
                             {product.description}
                         </ListGroupItem>
                     </ListGroup>
@@ -80,11 +88,11 @@ const ProductScreen = () => {
                                                </Form.Control>
                                             </Col>
                                     </Row>
-                                </ListGroupItem>)}   
+                                </ListGroupItem>)}
                                 <ListGroupItem>
                                     <button
                                         style={{ width: '100%' }}
-                                        className="btn btn-dark" 
+                                        className="btn btn-dark"
                                         disabled={product.countInStock === 0}
                                         onClick={() => addToCartHandler(product, qty)}
                                     >
