@@ -1,0 +1,30 @@
+h2 {
+    font-size: 24px; /* Set the desired font size for h2 tags */
+    font-family: 'Roboto', sans-serif;
+}
+
+h1{
+    font-size: 30px; /* Set the desired font size for h1 tags */
+    font-family: 'Roboto', sans-serif;
+}
+
+p {
+    font-size: 16px; /* Set the desired font size for p tags */
+    font-family: 'Roboto', sans-serif;
+}
+body {
+    font-family: 'Roboto', sans-serif;
+}
+
+[role="alert"] {
+    font-size: 16px; /* Set the desired font size for Message tags */
+}
+
+div {
+    font-size: 20px; /* Set the desired font size for list-group-item tags */
+    font-family: 'Roboto', sans-serif;
+}
+.small-button {
+    font-size: 12px !important; /* Adjust the font size as needed */
+    padding: 3px 5px !important; /* Adjust the padding as needed */
+}
