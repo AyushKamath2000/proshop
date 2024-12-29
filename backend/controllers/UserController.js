@@ -117,28 +117,55 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 // @route Get /api/users
 // @access Private and Admin
 const getUsers = asyncHandler(async (req, res) => {
-    res.send('get Users');
+    const users = await User.find({}).select('-password');
+    res.status(200).json(users);
 });
 
 // @desc get User profile by id
 // @route GET /api/users/:id
 // @access Private and Admin
 const getUserByID = asyncHandler(async (req, res) => {
-    res.send('get User by id');
+    const user = await User.findById(req.params.id).select('-password');
+    if(!user){
+        res.status(404);
+        throw new Error('User not found');
+    }else{
+        res.status(200).json(user);
+    }
 });
 
 // @desc update User profile by id
 // @route PUT /api/users/:id
 // @access Private and Admin
 const updateUserByID = asyncHandler(async (req, res) => {
-    res.send('update User by id');
+    const user = await User.findById(req.params.id);
+    if(user){
+       user.name = req.body.name || user.name;
+       user.email = req.body.email || user.email;
+       user.isAdmin = Boolean(req.body.isAdmin) || user.isAdmin;
+       
+       const updatedUser = await user.save();
+       res.status(200).json({...updatedUser});
+    }else{
+        res.status(400).json({message: 'User not found'});
+    }
 });
 
 // @desc delete Users profile
 // @route DELETE /api/users/:id
 // @access Private and Admin
 const deleteUsers = asyncHandler(async (req, res) => {
-    res.send('delete Users');
+    const user = await User.findById(req.params.id);
+    if(user){
+        if(user.isAdmin) {
+            res.status(400).json({message: 'You cannot delete Admin user'});
+        }else {
+            await user.deleteOne({_id:user._id});
+            res.status(200).json({message: 'User removed'});
+        }    
+    } else{
+        res.status(400).json({message: 'User not found'});
+    }
 });
 
 export {authUsers, logoutUser, registerUser, getUserProfile, updateUserProfile, getUsers, getUserByID, updateUserByID, deleteUsers};

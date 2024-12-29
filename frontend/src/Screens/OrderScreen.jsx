@@ -1,6 +1,11 @@
 import React, {Fragment, useEffect} from 'react'
 import {Link, useParams} from "react-router-dom";
-import {useGetOrderDetailsByIdQuery, useGetPayPalClientIdQuery, usePayOrderMutation} from "../slices/ordersApiSlice";
+import {
+    useDeliverOrderMutation,
+    useGetOrderDetailsByIdQuery,
+    useGetPayPalClientIdQuery,
+    usePayOrderMutation
+} from "../slices/ordersApiSlice";
 import Loader from "../Components/Loader";
 import Message from "../Components/Message";
 import {Button, Col, Image, ListGroup, ListGroupItem, Row} from "react-bootstrap";
@@ -13,8 +18,9 @@ const OrderScreen = () => {
     const {data:order,refetch,isLoading,isError} = useGetOrderDetailsByIdQuery(orderId);
     const [payOrder ,{isLoading:isPayLoading} ] = usePayOrderMutation();
     const [{isPending},paypalDispatch] = usePayPalScriptReducer();
-    const {userInfo} = useSelector(state => state.auth);
     const {data :paypal, isLoading: loadingPaypal, error : paypalError } = useGetPayPalClientIdQuery();
+    const [deliverOrder, {isLoading: isDeliverLoading}] = useDeliverOrderMutation();
+    const {userInfo} = useSelector(state => state.auth);
     
     const createOrder = (data,actions) => {
         return actions.order.create({
@@ -40,6 +46,11 @@ const OrderScreen = () => {
                 toast.error(error?.data?.message || error?.message)
             }
         })
+    }
+    const deliverOrderHandler = async () => {
+        await deliverOrder(orderId);
+        refetch();
+        toast.success("Order Delivered Successfully")
     }
     const onError = (error) => {
         toast.error(error?.data?.message || error?.message)
@@ -70,40 +81,42 @@ const OrderScreen = () => {
         }
     },[paypal,loadingPaypal,paypalError,order,paypalDispatch]);
     
-    return isLoading ? (<Loader/>): isError ? (<Message/>) : (
+    return isLoading ? (<Loader/>): isError ? (<Message variant= "danger"> Error occurred in getting your Order</Message>) : (
         <>
-            <h1>Order {order._id}</h1>
+            <h2>Product Shipping</h2>
+            <h3>Order: {order._id}</h3>
             <Row>
-                <Col md ="8">
+                <Col md="8">
                     <ListGroup variant={"flush"}>
                         <ListGroupItem>
-                            <h2>Shipping</h2>
                             <p><strong>Name: </strong>{order.user.name}</p>
                             <p><strong>Email: </strong>{order.user.email}</p>
-                            <p><strong>Address: </strong> 
+                            <p><strong>Address: </strong>
                                 {order.shippingAddress.address}, {order.shippingAddress.city}{' '}
                                 {order.shippingAddress.country}, {order.shippingAddress.postalCode}
                             </p>
-                            {order.isDelivered? <Message variant="success">Delivered Successfully</Message> : <Message variant="danger">Not Delivered</Message>}
+                            {order.isDelivered ? <Message variant="success">Delivered Successfully</Message> :
+                                <Message variant="danger">Not Delivered</Message>}
                         </ListGroupItem>
                         <ListGroupItem>
                             <h2>Payment Method</h2>
                             <p><strong>Method: </strong>{order.paymentMethod}</p>
-                            {order.isPaid? <Message variant={"success"}>paid on {order.paidAt} </Message>: <Message variant="danger">Not Paid</Message>}
+                            {order.isPaid ? <Message variant={"success"}>paid on {order.paidAt} </Message> :
+                                <Message variant="danger">Not Paid</Message>}
                         </ListGroupItem>
                         <ListGroupItem>
                             <h2>Order Items</h2>
-                            { order.orderItems.map((items ,index)=>(
+                            {order.orderItems.map((items, index) => (
                                 <ListGroup.Item key={index}>
                                     <Row>
                                         <Col md={1}>
-                                            <Image src={items.image} alt={items.name} fluid rounded />
+                                            <Image src={items.image} alt={items.name} fluid rounded/>
                                         </Col>
                                         <Col>
                                             <Link to={`/products/${items.product}`}>{items.name}</Link>
                                         </Col>
                                         <Col md={4}>
-                                            {items.qty} x ${items.price} = ${items.qty * items.price}
+                                            {items.qty} x ${items.price} = ${Math.round(items.qty * items.price * 100) / 100}
                                         </Col>
                                     </Row>
                                 </ListGroup.Item>
@@ -111,7 +124,7 @@ const OrderScreen = () => {
                         </ListGroupItem>
                     </ListGroup>
                 </Col>
-                <Col md ="4">
+                <Col md="4">
                     <ListGroup variant={"flush"}>
                         <h2>Order Summary</h2>
                         <ListGroupItem>
@@ -155,12 +168,18 @@ const OrderScreen = () => {
                                     )
                                 )
                             }
-                         </ListGroupItem>
+                        </ListGroupItem>
+                        <ListGroupItem>
+                            {isDeliverLoading && (<Loader/>)}
+                            {!order.isDelivered && order.isPaid && userInfo && userInfo.isAdmin &&(
+                            <Button onClick={deliverOrderHandler} className={"btn btn-block"}>Mark as Delivered</Button>
+                            )}
+                        </ListGroupItem>
                     </ListGroup>
                 </Col>
             </Row>
         </>
-    
-        )
+
+    )
 }
 export default OrderScreen
