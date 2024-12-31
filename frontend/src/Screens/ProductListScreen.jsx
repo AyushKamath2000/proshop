@@ -6,9 +6,12 @@ import {FaEdit, FaTrash} from "react-icons/fa";
 import Message from "../Components/Message";
 import {LinkContainer} from "react-router-bootstrap";
 import {toast} from "react-toastify";
+import {useParams} from "react-router-dom";
+import Paginate from "../Components/Paginate";
 
 const ProductListScreen = () => {
-    const { data: products , isLoading: productsLoading, isError:ProductsLoadingError,refetch } = useGetProductsQuery();
+    const {pageNumber} = useParams();
+    const { data , isLoading: productsLoading, isError:ProductsLoadingError,refetch } = useGetProductsQuery({pageNumber});
     const [createProduct ,{ isLoading: crateLoading, isError: errorCreating}] = useCreateProductMutation();
     const [deleteProduct ,{ isLoading: isDeleteLoading, isError: deletingError}] = useDeleteProductMutation();
     
@@ -27,7 +30,6 @@ const ProductListScreen = () => {
             toast.error(err?.data?.message || err?.error)
         }
     }
-    console.log(products)
     return (
         <>
         <Row className={"align-items-center"}>
@@ -40,39 +42,45 @@ const ProductListScreen = () => {
                 </Button>
             </Col>
         </Row>
-            {crateLoading||isDeleteLoading && <Loader/>}
+            {(crateLoading || isDeleteLoading) && <Loader/>}
             {productsLoading ? <Loader/> : ProductsLoadingError ? <Message variant ='danger'> {ProductsLoadingError}</Message>: (
                 <>
-                <Table stripped hover responsive className={"table-sm"}>
-                    <thead>
-                      <tr>
-                        <th>ID</th>
-                        <th>NAME</th>
-                        <th>PRICE</th>
-                        <th>CATEGORY</th>
-                        <th>BRAND</th>
-                        <th>button</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                    {products.map(product => (
-                        <tr key = {product._id}>
-                          <td>{product._id}</td>
-                          <td>{product.name}</td>
-                          <td>{product.price}</td>
-                          <td>{product.category}</td>
-                          <td>{product.brand}</td> 
-                          <td>
-                              <LinkContainer to ={`/admin/products/${product._id}/edit`}>
-                                  <Button  variant={"light"} className ={"btn-sm mx-2"} > <FaEdit/></Button>
-                              </LinkContainer>
-                              <Button  variant={"light"} className ={"btn-sm mx-2"} onClick={ ()=>deleteHandler(product._id)} > <FaTrash/></Button>
-                          </td>  
-                        </tr>
-                    ))}
-                    </tbody>
-                </Table>
-                </>
+                    <Table stripped hover responsive className={"table-sm"}>
+                        <thead>
+                          <tr>
+                            <th>ID</th>
+                            <th>NAME</th>
+                            <th>PRICE</th>
+                            <th>CATEGORY</th>
+                            <th>BRAND</th>
+                            <th>button</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                        {data?.products.map(product => (
+                            <tr key = {product._id}>
+                              <td>{product._id}</td>
+                              <td>{product.name}</td>
+                              <td>{product.price}</td>
+                              <td>{product.category}</td>
+                              <td>{product.brand}</td> 
+                              <td>
+                                  <LinkContainer to ={`/admin/products/${product._id}/edit`}>
+                                      <Button  variant={"light"} className ={"btn-sm mx-2"} > <FaEdit/></Button>
+                                  </LinkContainer>
+                                  <Button  variant={"light"} className ={"btn-sm mx-2"} onClick={ ()=>deleteHandler(product._id)} > <FaTrash/></Button>
+                              </td>  
+                            </tr>
+                        ))}
+                        </tbody>
+                    </Table>
+                    <Paginate
+                        pages={data.pages}
+                        page={data.page}
+                        isAdmin={true}
+                        keyword = {''}
+                    />
+                </>  
             )}
         </>
     )
