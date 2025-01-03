@@ -6,7 +6,7 @@ import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import userRoutes from "./routes/UserRoutes.js";
 import cookieParser from "cookie-parser";
 import orderRoutes from "./routes/OrderRoutes.js";
-import uploadRouter from "./models/uploadRouter.js";
+import uploadRouter from "./routes/uploadRouter.js";
 import  path from "path";
 dotenv.config();
 const port = process.env.PORT || 6000;

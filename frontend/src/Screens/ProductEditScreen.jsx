@@ -58,12 +58,12 @@ const ProductEditScreen = () => {
         const file = e.target.files[0];
         const formData = new FormData();
         formData.append('image', file);
-        const result = await uploadImage(formData).unwrap();
-        if(result.error){
-            toast.error(result.error);
-        } else {
-            toast.success(result.message);
-            setImage(result.imagePath);
+        try {
+            const res = await uploadImage(formData).unwrap();
+            toast.success(res.message);
+            setImage(res.image);
+        } catch (err) {
+            toast.error(err?.data?.message || err.error);
         }
     }
 

@@ -89,3 +89,51 @@ div {
     color: #dc3545;
 }
 
+/* Carousel Container */
+.small-carousel {
+    background-color: #f8f9fa;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding-left: 160px;
+}
+
+/* Carousel Image */
+.small-carousel .carousel-item img {
+    height: 100px;
+    max-width: 80%; /* Reduce width to make images smaller */
+    object-fit: contain;
+    margin: 0 auto; /* Center align the image */
+    border: 2px solid #ddd; /* Optional border for emphasis */
+    border-radius: 8px; /* Optional rounded edges */
+}
+
+/* Carousel Caption */
+.small-carousel .carousel-caption {
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    padding: 0.5rem;
+    border-radius: 5px;
+    text-align: center;
+}
+
+/* Carousel Links */
+.small-carousel a {
+    text-decoration: none;
+}
+
+/* Carousel Heading */
+.small-carousel h2 {
+    font-size: 1.5rem;
+    margin: 0.5rem 0;
+}
+
+
+/* Icon Styling (Optional) */
+.small-carousel .carousel-control-prev-icon,
+.small-carousel .carousel-control-next-icon {
+    filter: invert(100%); /* Make icons white for visibility */
+}
+
+
