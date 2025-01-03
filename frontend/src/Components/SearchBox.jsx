@@ -5,7 +5,7 @@ import {Button, Form} from "react-bootstrap";
 const SearchBox = () => {
     const navigate = useNavigate();
     const {keyword: urlKeyword} = useParams();
-    const [keyword,setKeyword] = useState('');
+    const [keyword,setKeyword] = useState(urlKeyword || '');
     
     const submitHandler = (e) => {
         e.preventDefault();

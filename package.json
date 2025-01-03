@@ -11,7 +11,8 @@
     "dev": "concurrently \"npm run server\" \"cross-env PORT=4000 npm run client\"",
     "test": "echo \"Error: no test specified\" && exit 1",
     "data:import": "node backend/models/seeder",
-    "data:destroy": "node backend/models/seeder -d"
+    "data:destroy": "node backend/models/seeder -d",
+    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend"
   },
   "author": "",
   "license": "ISC",

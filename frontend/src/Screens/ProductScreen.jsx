@@ -23,6 +23,7 @@ import Message from "../Components/Message";
 import {useDispatch, useSelector} from "react-redux";
 import {addToCart} from "../slices/cartSlice";
 import {toast} from "react-toastify";
+import Meta from "../Components/Meta";
 
 const styles = {
     listGroupItem: {

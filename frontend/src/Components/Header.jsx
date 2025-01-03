@@ -8,6 +8,7 @@ import {useNavigate} from "react-router-dom";
 import { logout } from "../slices/authSlice";
 import {useLogoutMutation} from "../slices/userApiSlice";
 import SearchBox from "./SearchBox";
+import {resetCartItems} from "../slices/cartSlice";
 const Header = () => {
     const {cartItems} = useSelector(state => state.cart);
     const {userInfo} = useSelector(state => state.auth);
@@ -18,6 +19,7 @@ const Header = () => {
         try{
             await logoutApiCall().unwrap()
             dispatch(logout())
+            dispatch(resetCartItems())
             navigate('/login')
         } catch(error){
             console.log(error)
@@ -30,8 +32,8 @@ const Header = () => {
                     <Container>
                         <LinkContainer to = "/">
                             <Navbar.Brand href="/">
-                                <Image rounded src={ img } alt={"YOU ARE PRO"} style={{ height: '40px', width: '40px' , padding: '2px'}} />
-                                ProShop
+                                <Image rounded src={ img } alt={"YOU ARE FAST"} style={{ height: '40px', width: '40px' , padding: '2px'}} />
+                                Fast Shop
                             </Navbar.Brand>
                         </LinkContainer>
                         <Navbar.Toggle aria-controls="basic-navbar-nav" />

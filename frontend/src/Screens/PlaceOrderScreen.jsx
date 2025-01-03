@@ -40,7 +40,7 @@ const PlaceOrderScreen = () => {
             dispatch(clearCartItems());
             navigate(`/order/${response._id}`)
         }catch(err){
-            toast.error("error")
+            toast.error("error occurred while placing order")
         }
     }
     return (
