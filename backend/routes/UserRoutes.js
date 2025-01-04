@@ -1,6 +1,6 @@
 import express  from "express";
 const router = express.Router();
-import {authUsers, logoutUser, registerUser, getUserProfile, updateUserProfile, getUsers, getUserByID, updateUserByID, deleteUsers} from "../controllers/userController.js";
+import {authUsers, logoutUser, registerUser, getUserProfile, updateUserProfile, getUsers, getUserByID, updateUserByID, deleteUsers} from "../controllers/UserController.js";
 import {admin, protect} from "../middleware/authMiddleware.js";
 
 router.route('/').post(registerUser).get(protect, admin, getUsers);
