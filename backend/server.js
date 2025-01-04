@@ -4,9 +4,9 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 dotenv.config();
 import connectDB from './config/db.js';
-import productRoutes from './routes/productRoutes.js';
-import userRoutes from './routes/userRoutes.js';
-import orderRoutes from './routes/orderRoutes.js';
+import productRoutes from './routes/ProductRoutes.js';
+import userRoutes from './routes/UserRoutes.js';
+import orderRoutes from './routes/OrderRoutes.js';
 import uploadRouter from './routes/uploadRouter.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 
