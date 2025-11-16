@@ -28,7 +28,7 @@ export default async function generateStructuredReview(productName) {
             "rating"
         ]
     };
-    const API_KEY =process.env.GOOGLE_API_KEY;
+    const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY; 
     const ai = new GoogleGenAI({ apiKey: API_KEY });
 
     const prompt = `
