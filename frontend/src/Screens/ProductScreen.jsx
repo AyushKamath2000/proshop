@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react'
+import React, {useEffect, useState} from 'react'
 import {Link, useNavigate, useParams} from "react-router-dom";
 import {
     Button,
@@ -17,13 +17,13 @@ import {
     useCreateProductReviewMutation,
     useGetProductDescriptionQuery
 } from "../slices/productsApiSlice";
-import {useState} from "react";
 import Loader from "../Components/Loader";
 import Message from "../Components/Message";
 import {useDispatch, useSelector} from "react-redux";
 import {addToCart} from "../slices/cartSlice";
 import {toast} from "react-toastify";
-import Meta from "../Components/Meta";
+import AISummary from "../Components/AISummary";
+import generateStructuredReview from "../Google/Config";
 
 const styles = {
     listGroupItem: {
@@ -32,7 +32,7 @@ const styles = {
         boxShadow: '0 6px 12px rgba(0, 0, 0, 0.1)',
         margin: '15px',
         background: 'linear-gradient(135deg, #f3f4f6, #ffffff)',
-        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        transition: 'transform 0.2s ease, boxShadow 0.2s ease',
         border: 'none',
     },
     listGroupItemHover: {
@@ -70,19 +70,71 @@ const ProductScreen = () => {
     const [qty, setQty] = useState(1);
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
-    const cart = useSelector(state => state.cart);
-    const { cartItems } = cart;
-    const cartItem = cartItems.find(cartItem => cartItem._id === productID);
-    const [ createProductReview, { isLoading:reviewLoading ,isError: reviewError } ] = useCreateProductReviewMutation();
-    const { userInfo } = useSelector(state => state.auth);
-    
+    const { cartItems } = useSelector(state => state.cart || { cartItems: [] });
+    const cartItem = cartItems.find(ci => ci._id === productID);
+
+    const [createProductReview, { isLoading: reviewLoading, isError: reviewError }] = useCreateProductReviewMutation();
+    const { userInfo } = useSelector(state => state.auth || {});
+    const [geminiResponse, setGeminiResponse] = useState(null);
+    const [geminiLoading, setGeminiLoading] = useState(false);
+
+    const { data: product, isLoading, error, refetch } = useGetProductDescriptionQuery(productID);
+
+    // Calls Gemini and expects an object; tolerate stringified JSON too.
+    async function callGoogleGemini(requestedData) {
+        if (!requestedData) return;
+        setGeminiLoading(true);
+        try {
+            const raw = await generateStructuredReview(requestedData);
+            // Accept either object or JSON string
+            let parsed = raw;
+            if (typeof raw === 'string') {
+                try {
+                    parsed = JSON.parse(raw);
+                } catch (parseErr) {
+                    // if it's a text block with code fences or extra text, try to extract JSON chunk
+                    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                        parsed = JSON.parse(jsonMatch[0]);
+                    } else {
+                        // fallback: keep raw as text in a safe shape
+                        parsed = { product_name: requestedData, product_description: String(raw), pros: [], cons: [], rating: null };
+                    }
+                }
+            }
+
+            // Normalize fields so component rendering is robust
+            const normalized = {
+                product_name: parsed.product_name || parsed.name || requestedData,
+                product_description: parsed.product_description || parsed.description || '',
+                pros: parsed.pros || parsed.Pros || parsed.positive || [],
+                cons: parsed.cons || parsed.Cons || parsed.negative || [],
+                rating: parsed.rating ?? parsed.Rating ?? null
+            };
+
+            setGeminiResponse(normalized);
+            console.log('Google Gemini API response (normalized):', normalized);
+        } catch (e) {
+            console.error('Error calling Google Gemini API and parsing:', e);
+            // keep geminiResponse null so UI shows nothing instead of crashing
+        } finally {
+            setGeminiLoading(false);
+        }
+    }
+
+    // Only call when product.name exists and we don't already have a response
+    useEffect(() => {
+        if (product?.name && !geminiResponse && !geminiLoading) {
+            callGoogleGemini(product.name);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [product?.name]);
 
     useEffect(() => {
         if (cartItem) {
             setQty(cartItem.qty);
         }
     }, [cartItem, setQty]);
-    const { data: product, isLoading, error, refetch } = useGetProductDescriptionQuery(productID);
 
     if (isLoading) return <Loader/>;
     if (error) return <Message varient="danger">`Error Loading Data{error.error|| error?.data?.message}`</Message>;
@@ -232,7 +284,25 @@ const ProductScreen = () => {
                                             
                             </ListGroupItem>
                         </ListGroup>
-                  </Col>         
+                  </Col>
+                    <Col md={6}>
+                        {geminiLoading && (
+                            <Card style={{ padding: '20px', textAlign: 'center', borderRadius: '10px' }}>
+                                <Loader />
+                                <p style={{ marginTop: '10px', color: '#555' }}>Generating AI Summary...</p>
+                            </Card>
+                        )}
+
+                        {!geminiLoading && geminiResponse && (
+                            <AISummary geminiResponse={geminiResponse} />
+                        )}
+
+                        {!geminiLoading && !geminiResponse && (
+                            <Card style={{ padding: '20px', textAlign: 'center', borderRadius: '10px' }}>
+                                <p style={{ color: '#777' }}>AI summary unavailable.</p>
+                            </Card>
+                        )}
+                    </Col>
                 </Row>
             </>
          )}            
