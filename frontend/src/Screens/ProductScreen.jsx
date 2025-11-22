@@ -24,6 +24,7 @@ import {addToCart} from "../slices/cartSlice";
 import {toast} from "react-toastify";
 import AISummary from "../Components/AISummary";
 import generateStructuredReview from "../Google/Config";
+import generateReviewSummaryFromReviews from "../Google/ConfigReviewSummary";
 
 const styles = {
     listGroupItem: {
@@ -78,7 +79,27 @@ const ProductScreen = () => {
     const [geminiResponse, setGeminiResponse] = useState(null);
     const [geminiLoading, setGeminiLoading] = useState(false);
 
+    const [geminiSummary, setGeminiSummary] = useState(null);
+    const [geminiSummaryLoading, setGeminiSummaryLoading] = useState(false);
+    const fetchSummary = async () => {
+        if (!product?.reviews || product.reviews.length === 0) return;
+
+        setGeminiSummaryLoading(true);
+        try {
+            const result = await generateReviewSummaryFromReviews(product.reviews);
+            console.log('Gemini review summary response:', result.review_summary);
+            setGeminiSummary(result.review_summary);
+        } finally {
+            setGeminiSummaryLoading(false);
+        }
+    };
     const { data: product, isLoading, error, refetch } = useGetProductDescriptionQuery(productID);
+
+    useEffect(() => {
+        if (product && product.reviews) {
+            fetchSummary().then(() => {setGeminiSummaryLoading(false)});
+        }
+    }, [product]);
 
     // Calls Gemini and expects an object; tolerate stringified JSON too.
     async function callGoogleGemini(requestedData) {
@@ -237,6 +258,14 @@ const ProductScreen = () => {
                       </Card>
                         {product.reviews.length === 0 && <Message>No Reviews</Message>}
                         <ListGroup variant={'flush'}>
+                            <p>AI summarised version for reviews</p>
+                            {geminiSummaryLoading && <Loader />}
+
+                            {!geminiSummaryLoading && geminiSummary && (
+                                <ListGroupItem style={styles.listGroupItem}>
+                                    <p style={styles.paragraph}>{geminiSummary}</p>
+                                </ListGroupItem>
+                            )}
                             {product.reviews.map(review => (
                                 <ListGroupItem key={review.id} style={styles.listGroupItem}>
                                     <strong style={styles.strong}>{review.name}</strong>

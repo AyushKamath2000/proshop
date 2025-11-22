@@ -1,6 +1,6 @@
-import React from 'react'
+import React, {useState} from 'react'
 import {Navbar, Nav, Container, Badge, NavLink, NavDropdown, Image} from 'react-bootstrap'
-import{ FaShoppingCart, FaUser } from 'react-icons/fa'
+import {FaComments, FaShoppingCart, FaUser} from 'react-icons/fa'
 import{ LinkContainer } from 'react-router-bootstrap'
 import {useDispatch, useSelector} from "react-redux";
 import  img  from '../Assets/img.png'
@@ -9,6 +9,7 @@ import { logout } from "../slices/authSlice";
 import {useLogoutMutation} from "../slices/userApiSlice";
 import SearchBox from "./SearchBox";
 import {resetCartItems} from "../slices/cartSlice";
+import ChatBox from "./ChatBox";
 const Header = () => {
     const {cartItems} = useSelector(state => state.cart);
     const {userInfo} = useSelector(state => state.auth);
@@ -25,6 +26,7 @@ const Header = () => {
             console.log(error)
         }
     }
+    const [showChat, setShowChat] = useState(false);
 
     return (
         <header>
@@ -79,7 +81,11 @@ const Header = () => {
                                         </LinkContainer>
                                     </NavDropdown>
                                 )}
+                                    <NavLink onClick={() => setShowChat(true)} style={{ cursor: 'pointer' }}>
+                                        <FaComments /> Chat
+                                    </NavLink>
                             </Nav>
+                            <ChatBox show={showChat} onClose={() => setShowChat(false)} />
                         </Navbar.Collapse>
                     </Container>
                 </Navbar>
